@@ -1,0 +1,9 @@
+Comandos com Docker
+
+	Os comandos são fundamentais para que possamos usufruir da ferramenta, permitindo que passemos instruções que serão executadas para que tudo funcione.
+
+docker  --help (mostra todos os comandos)
+docker run  –ti (executa contêiner interativo)
+docker run  –ti nginx  –name nginx  –p 8081:8081 (exemplo de contêiner)
+docker ps (stopa “para” o contêiner)
+docker ps –a (identifica motivos dos stops/pauses)
