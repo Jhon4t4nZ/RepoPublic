@@ -1,4 +1,5 @@
-Comandos com Docker
+COMANDOS COM DOCKER
+
 
 	Os comandos são fundamentais para que possamos usufruir da ferramenta, permitindo que passemos instruções que serão executadas para que tudo funcione.
 
@@ -7,3 +8,121 @@ docker run  –ti (executa contêiner interativo)
 docker run  –ti nginx  –name nginx  –p 8081:8081 (exemplo de contêiner)
 docker ps (stopa “para” o contêiner)
 docker ps –a (identifica motivos dos stops/pauses)
+docker build  -t (constrói/cria imagem do docker)
+docker exec -ti (executa comando dentro do container)
+
+
+IMAGENS NO DOCKER
+
+
+	FROM - base do sistema operacional que pode ser customizado, mas que vai servir de base para as demais configs que vamos executar;
+	WORKDIR - acessa um diretório;
+	ENV - adiciona variáveis de ambiente;
+	RUN - roda comandos em tempo de execução;
+	CMD - roda comandos após o início do container, permitindo que o processo seja prioritário (caso usemos a instrução ENTRYPOINT, a prioridade será dele e o CMD será utilizado como argumento).
+
+
+VOLUMES
+
+
+	Containers por padrão não armazenam estado, sendo considerados efêmeros.
+	Os volumes se tornam necessários para mantermos algumas informações mesmo após os containers deixarem de existir.
+
+	-Tipos de Volumes-
+	
+	Docker volume: gerenciado pelo Docker, monta o diretório dentro do container.
+
+	Docker Bind: é a forma mais antiga de armazenar conteúdo, porém é mais limitado do que o Docker Volume, pois faz um link entre o local e o container, criando o caminho absoluto dele, enquanto o volume cria um novo diretório no caminho de armazenamento do docker.
+
+	tmpfs: armazenamento temporário para recursos como dados sensíveis, por exemplo. Só existe enquanto o container estiver ativo.
+
+	Exemplo de aplicação: 
+	$ docker run -d --name letscode --mount
+	type=bind, source=C:\Users\lcode\app, target=/app nginx
+
+
+COMUNICAÇÃO ENTRE CONTAINERS
+
+
+	Não usamos containers isolados na maioria dos casos, portanto, ao separarmos serviços por contextos, precisamos que eles se comuniquem.
+	O Docker possui endereçamento de IP próprio e, portanto, possui uma rede que pode se comunicar entre si, sem precisar ser exposta para a internet, o que é bastante importante para comunicação entre serviços como banco de dados, por exemplo. Podemos criar as nossas próprias redes também, se necessário.
+	
+	-TIPOS DE REDES-
+	
+	Bridge: é o plugin default de rede, cria uma comunicação entre os containers de forma que eles possam se comunicar dentro de ecossistemas isolados. Também cria resolução de DNS, em que podemos dar nomes para nossos containers e conectar passando esse nome entre eles.
+	
+	Host: usa a rede do host e compartilha-a, portanto, o que for válido como rede para a máquina onde o Docker está rodando, será válido para o container também.
+
+	Overlay: quando temos hosts distribuídos, utilizamos o formato overlay, que permite a comunicação segura entre diversos componentes, como serviços em máquinas diferentes.
+
+Exemplo prático:
+
+	docker network create --driver=bridge --subnet=172.28.0.0/16 --ip-range=172.28.5.0/24 --gateway=172.28.5.254 letscode-network
+
+
+ECOSSISTEMA DE CONTAINERS
+
+
+	Containers se comunicam e possuem particularidades, portanto, cada um tem sua função, seja ele uma API, Banco de Dados ou aplicação Web, por exemplo.
+	O comando --link é utilizado para que os containers se reconheçam, sem precisar passar o host do container.
+	
+Exemplo de aplicação prática:
+
+Banco
+$ docker run -e MYSQL_ROOT_PASSWORD=minha-senha --name db -v /app:/var/lib/mysql -d mysql:latest
+$ docker ps
+
+App
+$ docker run -e JOOMLA_DB_USER=root -e JOOMLA_DB_PASSWORD=minha-senha --name joomla --link db:mysql -p 8080:80 -d joomla:php8.0
+$ docker ps
+
+$ ping db	
+
+
+DOCKER COMPOSE
+
+
+	Docker Compose nos auxilia a criar stacks completas, utilizando componentes do Docker como imagens, variáveis de ambiente, portas, etc.
+
+Exemplo de aplicação prática:
+
+	version: "3.9"
+	services:
+	web:
+	  build:
+	  ports:
+	    - "8000:5000"
+	  volumes:
+	    - .:/code
+	  environment:
+	    FLASK_DEBUG: True
+	redis:
+	  image: "redis:alpine"
+
+
+Comandos do Docker Compose:
+
+$ docker-compose up (-d) : sobe containers
+$ docker-compose logs : verifica saúde dos containers e mensagens da app
+$ docker-compose ps : verifica os containers rodando
+$ docker-compose kill : para/stoppa todos os containers
+$ docker-compose rm -f : remove containers
+
+
+Exemplo prático:
+
+$ git clone https://github.com/Talits/example-course-containers.git
+$ cd example-course-containers/app_docker_compose
+
+
+BENEFÍCIOS
+
+
+	Utilizar containers nos possibilita fazer e testar inúmeras possibilidades, bem como democratizar tecnologias, reduzir custos, melhorar performance, escalabilidade e confiabilidade.
+	
+
+ORQUESTRADORES
+	  
+	* Com a popularização do uso de containers surgem os orquestradores, que nos ajudam a olhar para milhares de containers ao mesmo tempo, permitindo que existam health checks, segmentação de apps em contextos, armazenamento de dados sensíveis, entre outros.
+	* O orquestrador mais famoso é o Kubernetes. Ele permite utilizarmos containers de forma prática e efetiva, garantindo controle, estado, saúde de nossas aplicações e serviços.
+
